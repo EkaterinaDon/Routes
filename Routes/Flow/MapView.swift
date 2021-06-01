@@ -18,6 +18,15 @@ class MapView: UIView {
         return mapView
     }()
 
+    private(set) lazy var showRouteButton: UIButton = {
+        let button = UIButton(type: .roundedRect)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.setTitle("Show last route", for: .normal)
+        button.titleLabel?.font = .boldSystemFont(ofSize: 13.0)
+        button.setTitleColor(.black, for: .normal)
+        return button
+    }()
+    
     // MARK: - Init
     
     override init(frame: CGRect) {
@@ -34,6 +43,7 @@ class MapView: UIView {
     
     private func configureUI() {
         self.addSubview(self.mapView)
+        self.addSubview(self.showRouteButton)
         setupConstraints()
     }
     
@@ -45,7 +55,12 @@ class MapView: UIView {
             self.mapView.topAnchor.constraint(equalTo: safeArea.topAnchor),
             self.mapView.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor),
             self.mapView.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor),
-            self.mapView.bottomAnchor.constraint(equalTo: safeArea.bottomAnchor)
+            self.mapView.bottomAnchor.constraint(equalTo: safeArea.bottomAnchor),
+            
+            self.showRouteButton.bottomAnchor.constraint(equalTo: self.mapView.bottomAnchor),
+            self.showRouteButton.centerXAnchor.constraint(equalTo: self.mapView.centerXAnchor),
+            self.showRouteButton.widthAnchor.constraint(equalToConstant: 250.0),
+            self.showRouteButton.heightAnchor.constraint(equalToConstant: 50.0)
         ])
     }
 }
