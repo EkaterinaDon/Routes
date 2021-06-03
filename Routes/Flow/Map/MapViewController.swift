@@ -26,7 +26,7 @@ class MapViewController: UIViewController {
 
         configureMap()
         configureLocationManager()
-        
+        self.navigationController?.setNavigationBarHidden(false, animated: true)
         navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Stop", style: .plain, target: self, action: #selector(stopTrack(sender:)))
         navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Start", style: .plain, target: self, action: #selector(startTrack(sender:)))
     }
@@ -84,14 +84,16 @@ class MapViewController: UIViewController {
     }
     
     func getLastRoute() {
-        let lastRoute = RealmService.shared.getPath()
+        guard let lastRoute = RealmService.shared.getPath() else {
+            showAlert(title: "Error", message: "You dont have routs yet.")
+            return }
         route?.map = nil
         route = GMSPolyline()
         route?.map = mapView.mapView
         route?.path = lastRoute
         route?.strokeColor = .red
         route?.strokeWidth = 3
-        let showAllRoute = GMSCameraUpdate.fit(GMSCoordinateBounds(path: lastRoute!))
+        let showAllRoute = GMSCameraUpdate.fit(GMSCoordinateBounds(path: lastRoute))
         mapView.mapView.animate(with: showAllRoute)
     }
     
