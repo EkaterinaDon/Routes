@@ -16,7 +16,15 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let windowScene = (scene as? UIWindowScene) else { return }
         window = UIWindow(frame: windowScene.coordinateSpace.bounds)
         window?.windowScene = windowScene
-        let navigationController = UINavigationController(rootViewController: MapViewController())
+        
+        let controller: UIViewController
+        if UserDefaults.standard.bool(forKey: "isLogin") {
+            controller = MapViewController()
+        } else {
+            controller = LoginViewController()
+        }
+        
+        let navigationController = UINavigationController(rootViewController: controller)
         window?.rootViewController = navigationController
         window?.makeKeyAndVisible()
     }
