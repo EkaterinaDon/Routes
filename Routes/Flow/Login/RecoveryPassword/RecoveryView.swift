@@ -28,6 +28,7 @@ class RecoveryView: UIView {
         textField.textColor = .black
         textField.font = UIFont.systemFont(ofSize: 15.0)
         textField.placeholder = "Login"
+        textField.autocorrectionType = .no
         return textField
     }()
     

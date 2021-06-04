@@ -52,6 +52,7 @@ class LoginView: UIView {
         textField.borderStyle = .roundedRect
         textField.textColor = .black
         textField.font = UIFont.systemFont(ofSize: 15.0)
+        textField.autocorrectionType = .no
         textField.placeholder = "User name"
         return textField
     }()
@@ -63,7 +64,8 @@ class LoginView: UIView {
         textField.textColor = .black
         textField.font = UIFont.systemFont(ofSize: 15.0)
         textField.placeholder = "User password"
-        //textField.isSecureTextEntry = true
+        textField.autocorrectionType = .no
+        textField.isSecureTextEntry = true
         return textField
     }()
         
