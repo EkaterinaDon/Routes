@@ -6,6 +6,8 @@
 //
 
 import UIKit
+import RxSwift
+import RxCocoa
 
 class LoginViewController: UIViewController {
 
@@ -16,6 +18,7 @@ class LoginViewController: UIViewController {
     private let userManager = UserManagerFactory().makeUserManager()
     
     var loginRouter: LoginRouter!
+    let bag = DisposeBag()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -25,6 +28,8 @@ class LoginViewController: UIViewController {
         loginView.loginButton.addTarget(self, action: #selector(loginButtonDidTap), for: .touchUpInside)
         loginView.registrationButton.addTarget(self, action: #selector(registrationButtonDidTap), for: .touchUpInside)
         loginView.rcoveryButton.addTarget(self, action: #selector(rcoveryButtonDidTap), for: .touchUpInside)
+        
+        configureLoginBindings()
     }
 
     override func loadView() {
@@ -84,6 +89,19 @@ class LoginViewController: UIViewController {
     
     @objc func rcoveryButtonDidTap() {
         loginRouter.toRecoveryVc()
+    }
+    
+    func configureLoginBindings() {
+        Observable
+            .combineLatest(loginView.loginTextField.rx.text, loginView.passwordTextField.rx.text)
+            .map { login, password in
+                return !(login ?? "").isEmpty && (password ?? "").count >= 3
+            }
+            .bind { [weak self] inputFilled in
+                self?.loginView.loginButton.isEnabled = inputFilled
+                self?.loginView.loginButton.setTitleColor(inputFilled ? UIColor.black : UIColor.gray, for: .normal)
+            }
+            .disposed(by: bag)
     }
 }
 

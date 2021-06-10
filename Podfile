@@ -8,4 +8,7 @@ target 'Routes' do
   # Pods for Routes
     pod 'GoogleMaps', '5.0.0'
     pod 'RealmSwift', '=10.7.6'
+
+    pod 'RxSwift', '6.2.0'
+    pod 'RxCocoa', '6.2.0'
 end
