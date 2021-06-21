@@ -12,11 +12,12 @@ import CoreLocation
 class MapViewController: UIViewController {
 
     let coordinate = CLLocationCoordinate2D(latitude: 55.753215, longitude: 37.622504)
-    var locationManager: CLLocationManager?
+    let locationManager = LocationManager.instance
     var route: GMSPolyline?
     var routePath: GMSMutablePath?
     var manualMarker: GMSMarker?
     var isTracking: Bool = false
+    
     private var mapView: MapView {
         return self.view as! MapView
     }
@@ -44,13 +45,16 @@ class MapViewController: UIViewController {
     }
 
     func configureLocationManager() {
-        locationManager = CLLocationManager()
-        guard let locationManager = locationManager else { return }
-        locationManager.requestAlwaysAuthorization()
-        locationManager.allowsBackgroundLocationUpdates = true
-        locationManager.pausesLocationUpdatesAutomatically = false
-        locationManager.startMonitoringSignificantLocationChanges()
-        locationManager.delegate = self
+        locationManager
+            .location
+            .asObservable()
+            .bind { [weak self] location in
+                guard let self = self, let location = location else { return }
+                self.routePath?.add(location.coordinate)
+                self.route?.path = self.routePath
+                let position = GMSCameraPosition.camera(withTarget: location.coordinate, zoom: 17.0)
+                self.mapView.mapView.animate(to: position)
+            }
     }
     
     @objc func stopTrack(sender: UIBarButtonItem) {
@@ -58,7 +62,6 @@ class MapViewController: UIViewController {
     }
     
     @objc func startTrack(sender: UIBarButtonItem) {
-        guard let locationManager = locationManager else { return }
         route?.map = nil
         route = GMSPolyline()
         routePath = GMSMutablePath()
@@ -77,7 +80,6 @@ class MapViewController: UIViewController {
     }
     
     func stopTracking() {
-        guard let locationManager = locationManager else { return }
         locationManager.stopUpdatingLocation()
         RealmService.shared.savePath(from: routePath)
         isTracking = false
