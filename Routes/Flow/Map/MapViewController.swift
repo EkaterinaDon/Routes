@@ -8,6 +8,8 @@
 import UIKit
 import GoogleMaps
 import CoreLocation
+import RxCocoa
+import RxSwift
 
 class MapViewController: UIViewController {
 
@@ -16,7 +18,10 @@ class MapViewController: UIViewController {
     var route: GMSPolyline?
     var routePath: GMSMutablePath?
     var manualMarker: GMSMarker?
+    var avatarMarker: GMSMarker?
     var isTracking: Bool = false
+    var image : UIImage?
+    let imageStorage = ImageStorage()
     
     private var mapView: MapView {
         return self.view as! MapView
@@ -54,6 +59,16 @@ class MapViewController: UIViewController {
                 self.route?.path = self.routePath
                 let position = GMSCameraPosition.camera(withTarget: location.coordinate, zoom: 17.0)
                 self.mapView.mapView.animate(to: position)
+                if self.avatarMarker != nil {
+                    self.avatarMarker!.map = nil
+                }
+                self.avatarMarker = GMSMarker(position: location.coordinate)
+                if let image = self.imageStorage.getImage() {
+                    self.avatarMarker!.iconView = self.configureMarkerIconView(with: image)
+                } else {
+                    self.avatarMarker!.icon = UIImage(systemName: "star.fill")
+                }
+                self.avatarMarker!.map = self.mapView.mapView
             }
     }
     
@@ -110,12 +125,29 @@ extension MapViewController: GMSMapViewDelegate {
         } else {
             let marker = GMSMarker(position: coordinate)
             marker.map = mapView
-            marker.icon = GMSMarker.markerImage(with: .red)
             marker.title = "Hi"
             marker.snippet = "Manual Marker"
+            marker.icon = UIImage(systemName: "star.fill")
             self.manualMarker = marker
         }
     }
+    
+    
+    private func configureMarkerIconView(with image: UIImage?) -> UIImageView {
+        let markerView = UIImageView(frame: CGRect(x: 0, y: 0, width: 40, height: 40))
+        markerView.image = image
+        markerView.tintColor = .white
+        markerView.layer.cornerRadius = 20
+        markerView.layer.borderColor = UIColor.white.cgColor
+        markerView.layer.borderWidth = 1
+        markerView.clipsToBounds = true
+        return markerView
+    }
+    
+//    private func deleteMarker() {
+//        avatarMarker?.map = nil
+//        avatarMarker = nil
+//    }
 }
 
 // MARK: - CLLocationManagerDelegate
