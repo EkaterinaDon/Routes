@@ -19,6 +19,7 @@ class LoginViewController: UIViewController {
     
     var loginRouter: LoginRouter!
     let bag = DisposeBag()
+    let imageStorage = ImageStorage()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -28,6 +29,7 @@ class LoginViewController: UIViewController {
         loginView.loginButton.addTarget(self, action: #selector(loginButtonDidTap), for: .touchUpInside)
         loginView.registrationButton.addTarget(self, action: #selector(registrationButtonDidTap), for: .touchUpInside)
         loginView.rcoveryButton.addTarget(self, action: #selector(rcoveryButtonDidTap), for: .touchUpInside)
+        loginView.selfieButton.addTarget(self, action: #selector(selfieButtonDidTap), for: .touchUpInside)
         
         configureLoginBindings()
     }
@@ -91,6 +93,17 @@ class LoginViewController: UIViewController {
         loginRouter.toRecoveryVc()
     }
     
+    @objc func selfieButtonDidTap() {
+        guard UIImagePickerController.isSourceTypeAvailable(.photoLibrary) else { return }
+        
+        let imagePickerController = UIImagePickerController()
+        imagePickerController.sourceType = .photoLibrary
+        imagePickerController.allowsEditing = true
+        imagePickerController.delegate = self
+        
+        present(imagePickerController, animated: true)
+    }
+    
     func configureLoginBindings() {
         Observable
             .combineLatest(loginView.loginTextField.rx.text, loginView.passwordTextField.rx.text)
@@ -104,6 +117,43 @@ class LoginViewController: UIViewController {
             .disposed(by: bag)
     }
 }
+
+// MARK: - UIImagePickerControllerDelegate
+
+extension LoginViewController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+    
+    func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+        picker.dismiss(animated: true)
+    }
+    
+    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+        
+        picker.dismiss(animated: true) { [weak self] in
+            guard let image = self?.extractImage(from: info) else  { return }
+            UIImageWriteToSavedPhotosAlbum(image, self, #selector(self?.image(_:didFinishSavingWithError:contextInfo:)), nil)
+        }
+    }
+    
+    private func extractImage(from info: [UIImagePickerController.InfoKey: Any]) -> UIImage? {
+        if let image = info[UIImagePickerController.InfoKey(rawValue: UIImagePickerController.InfoKey.editedImage.rawValue)] as? UIImage {
+            return image
+        } else if let image = info[UIImagePickerController.InfoKey(rawValue: UIImagePickerController.InfoKey.originalImage.rawValue)] as? UIImage {
+            return image
+        } else {
+            return nil
+        }
+    }
+    
+    @objc func image(_ image: UIImage, didFinishSavingWithError error: Error?, contextInfo: UnsafeRawPointer) {
+        if let error = error {
+            showAlert(title: "Error, image does not save", message: error.localizedDescription)
+        } else {
+            imageStorage.save(image: image)
+            showAlert(title: "Success!", message: "Image saved to storage!")
+        }
+    }
+}
+
 
 // MARK: - Alert
 
@@ -123,8 +173,10 @@ final class LoginRouter: BaseRouter {
         let mapViewController = MapViewController()
         push(vc: mapViewController)
     }
+    
     func toRecoveryVc() {
         let recoveryViewController = RecoveryViewController()
         present(vc: recoveryViewController)
     }
+
 }

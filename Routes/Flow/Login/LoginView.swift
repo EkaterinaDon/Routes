@@ -95,6 +95,15 @@ class LoginView: UIView {
         button.setTitleColor(.lightGray, for: .normal)
         return button
     }()
+    
+    private(set) lazy var selfieButton: UIButton = {
+        let button = UIButton(type: .roundedRect)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.setTitle("Selfie", for: .normal)
+        button.titleLabel?.font = .boldSystemFont(ofSize: 15.0)
+        button.setTitleColor(.black, for: .normal)
+        return button
+    }()
     // MARK: - Init
     
     override init(frame: CGRect) {
@@ -119,6 +128,7 @@ class LoginView: UIView {
         self.contentView.addSubview(self.loginButton)
         self.contentView.addSubview(self.registrationButton)
         self.contentView.addSubview(self.rcoveryButton)
+        self.contentView.addSubview(self.selfieButton)
         
         setupConstraintsScrollView()
         setupConstraints()
@@ -162,7 +172,11 @@ class LoginView: UIView {
             
             self.loginButton.topAnchor.constraint(equalTo: self.passwordTextField.bottomAnchor, constant: 40.0),
             self.loginButton.centerXAnchor.constraint(equalTo: self.contentView.centerXAnchor),
-            self.loginButton.widthAnchor.constraint(equalToConstant: 250.0)
+            self.loginButton.widthAnchor.constraint(equalToConstant: 250.0),
+            
+            self.selfieButton.topAnchor.constraint(equalTo: self.loginButton.bottomAnchor, constant: 20.0),
+            self.selfieButton.centerXAnchor.constraint(equalTo: self.contentView.centerXAnchor),
+            self.selfieButton.widthAnchor.constraint(equalToConstant: 250.0)
             ])
     }
 
